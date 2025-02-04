@@ -5,8 +5,8 @@ import (
     "fmt"
     "net/http"
     "log"
-    
-    "crud_go/internal/category"
+
+    "crud_go/internal"
 )
 
 var (
@@ -23,6 +23,8 @@ func init(){
 
 func main (){
 
+    category.NewRepository
+    
     // Categorias
     http.HandleFunc("/api/addCategoria"  , category.Add)
 
