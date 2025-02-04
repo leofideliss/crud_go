@@ -1,11 +1,12 @@
 package main
 
 import (
-    "fmt"
     "flag"
+    "fmt"
     "net/http"
-
-    "github.com/leofideliss/crud_go/internal/controller"
+    "log"
+    
+    "crud_go/internal/category"
 )
 
 var (
@@ -21,8 +22,11 @@ func init(){
 }
 
 func main (){
-    http.HandleFunc("/api/add"  , Add)
 
-    http.ListenAndServe(fmt.Sprintf(":%d", *porta), nil)
+    // Categorias
+    http.HandleFunc("/api/addCategoria"  , category.Add)
+
+    
+    log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", *porta), nil))
 }
 
