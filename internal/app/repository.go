@@ -9,6 +9,6 @@ type Repository interface {
 }
 
 type Category struct {
-    Name string `json:"name"`
-    Tag string `json:"tag"`
+    Name string `json:"name" bson:"name"`
+    Tag string `json:"tag" bson:"tag"`
 }

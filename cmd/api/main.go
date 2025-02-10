@@ -25,15 +25,15 @@ func init() {
 }
 
 func main() {
-
+    // na memória
     repo = app.CreateRepository()
-
+    
+    app.Connect()
+    
     http.HandleFunc("/api/addCategory", addCategory)
     http.HandleFunc("/api/deleteCategory", deleteCategory)
     http.HandleFunc("/api/readCategory", readCategory)
     http.HandleFunc("/api/updateCategory",updateCategory)
-
-
 
     log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", *porta), nil))
 }
