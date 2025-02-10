@@ -16,9 +16,23 @@ func (r *repositoryInMemory) Create(c *Category) bool {
 	return true
 }
 
+func (r *repositoryInMemory) Delete (id int) bool {
+    delete(r.categories , id)
+    return true
+}
+
 func (r *repositoryInMemory) Read(id int) (*Category , error) {
     if len(r.categories) != 0 || id <= len(r.categories) {
         return r.categories[id] , nil
     }
     return nil ,  nil
 }
+
+func (r *repositoryInMemory) Update(c *Category , id int) bool{
+    if r.categories[id] != nil {
+        r.categories[id] = c
+        return true
+    }
+    return false
+}
+
