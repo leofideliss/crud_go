@@ -9,7 +9,19 @@ import (
     "github.com/joho/godotenv"
     "go.mongodb.org/mongo-driver/mongo"
     "go.mongodb.org/mongo-driver/mongo/options"
+    "go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+    
 )
+
+type mongoRepository struct {
+	collection *mongo.Collection
+    context context.Context
+}
+
+func NewMongoRepository(collection *mongo.Collection) *mongoRepository {
+	return &mongoRepository{collection,context.TODO()}
+}
 
 func Connect() *mongo.Collection {
     // Find .evn
@@ -35,7 +47,7 @@ func Connect() *mongo.Collection {
     }
 
     // Create collection
-    collection := client.Database("testdb").Collection("test")
+    collection := client.Database("crud_go").Collection("categories")
     if err != nil {
         log.Fatal(err)
     }
@@ -44,3 +56,83 @@ func Connect() *mongo.Collection {
 
     return collection
 }
+
+func (c *mongoRepository) Create(data *Category) bool{
+    _, err := c.collection.InsertOne(c.context , data)
+	if err != nil{
+        return false
+    }
+    return true
+}
+
+func (c *mongoRepository) Delete(id string) bool{
+    objId, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		log.Fatal("ID inválido:", err)
+	}
+    
+	filter := bson.D{primitive.E{Key: "_id", Value: objId}}
+
+	_, errDB := c.collection.DeleteOne(c.context, filter)
+	if errDB != nil {
+		return false
+	}
+
+	return true
+}
+
+func (c *mongoRepository) Read(id string) (*Category , error){
+    
+    objId, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		log.Fatal("ID inválido:", err)
+	}
+
+    filter := bson.D{primitive.E{Key:"_id" , Value:objId}}
+
+    var category *Category
+    errDB := c.collection.FindOne(c.context,filter).Decode(&category)
+	if errDB != nil {
+		return nil, err
+	}
+
+    return category, nil
+}
+
+
+func (c *mongoRepository) Update(data *Category , id string) bool{
+    objId, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		log.Fatal("ID inválido:", err)
+	}
+	filter := bson.D{{"_id", objId}}
+	update := bson.D{{"$set", data}}
+    result ,_ := c.collection.UpdateOne(c.context,filter,update)
+	if result.MatchedCount != 0 {
+		fmt.Println("matched and replaced an existing document")
+		return true
+	}
+
+    return false
+}
+
+func (c *mongoRepository) List() interface{}{
+   	filter := bson.M{}
+
+	cursor, err := c.collection.Find(c.context, filter)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+    var arrayCategories []interface{}
+    for cursor.Next(c.context) {
+        var categorie Category
+		if err := cursor.Decode(&categorie); err != nil {
+			log.Fatal(err)
+		}
+		arrayCategories = append(arrayCategories, categorie)
+	}
+
+    return arrayCategories
+}
+

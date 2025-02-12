@@ -8,7 +8,6 @@ import (
     "io/ioutil"
     "log"
     "net/http"
-    "strconv"
 )
 
 var (
@@ -26,14 +25,16 @@ func init() {
 
 func main() {
     // na memória
-    repo = app.CreateRepository()
-    
-    app.Connect()
-    
+    // repo = app.CreateRepository()
+    // no BD
+    repo = app.NewMongoRepository(app.Connect())
+   
     http.HandleFunc("/api/addCategory", addCategory)
     http.HandleFunc("/api/deleteCategory", deleteCategory)
     http.HandleFunc("/api/readCategory", readCategory)
     http.HandleFunc("/api/updateCategory",updateCategory)
+    http.HandleFunc("/api/listCategory",listCategory)
+
 
     log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", *porta), nil))
 }
@@ -63,8 +64,8 @@ func deleteCategory(w http.ResponseWriter , r *http.Request){
     }
 
     id := r.URL.Query().Get("id")
-    pos, _ := strconv.Atoi(id)
-    hasDeleted := repo.Delete(pos)
+    fmt.Println(id)
+    hasDeleted := repo.Delete(id)
     if hasDeleted {
         makeResponse(w,Response{"success" : true,"message":"Categoria deletada"},http.StatusOK,Headers{"Content-type":"application/json"})
         return
@@ -74,6 +75,17 @@ func deleteCategory(w http.ResponseWriter , r *http.Request){
     return
 }
 
+func listCategory(w http.ResponseWriter , r *http.Request){
+    if r.Method != http.MethodGet {
+        makeResponse(w,Response{"success" : false,"message":"Método inválido"},http.StatusMethodNotAllowed,Headers{"Content-type":"application/json"})
+        return
+    }
+    
+    makeResponse(w,Response{"success" : true,"message":"Lista consultada" , "list":repo.List()},http.StatusOK,Headers{"Content-type":"application/json"})
+    return
+    
+}
+
 func readCategory(w http.ResponseWriter, r *http.Request) {
     if r.Method != http.MethodGet {
         makeResponse(w,Response{"success" : false,"message":"Método inválido"},http.StatusMethodNotAllowed,Headers{"Content-type":"application/json"})
@@ -81,8 +93,8 @@ func readCategory(w http.ResponseWriter, r *http.Request) {
     }
     
     id := r.URL.Query().Get("id")
-    pos, _ := strconv.Atoi(id)
-    categoryPos, _ := repo.Read(pos)
+    fmt.Println(id);
+    categoryPos, _ := repo.Read(id)
 
     if categoryPos != nil {
         makeResponse(w,Response{"success" : true,"message":"Categoria consultada" ,"name":string(categoryPos.Name) ,"tag":string(categoryPos.Tag)},http.StatusOK,Headers{"Content-type":"application/json"})
@@ -102,7 +114,6 @@ func updateCategory(w http.ResponseWriter , r *http.Request){
     var category app.Category
     
     id := r.URL.Query().Get("id")
-    pos, _ := strconv.Atoi(id)
     b, _ := ioutil.ReadAll(r.Body)
     errJson := json.Unmarshal(b, &category)
     if errJson != nil {
@@ -110,7 +121,7 @@ func updateCategory(w http.ResponseWriter , r *http.Request){
         return
     }
 
-    err := repo.Update(&category,pos)
+    err := repo.Update(&category,id)
     if err {
         makeResponse(w,Response{"success" : true,"message":"Categoria atualizada com sucesso!"},http.StatusOK,Headers{"Content-type":"application/json"})
         return

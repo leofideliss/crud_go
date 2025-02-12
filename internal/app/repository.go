@@ -2,10 +2,10 @@ package app
 
 type Repository interface {
     Create(data *Category) bool
-    Read(id int) (*Category , error)
-    Update(data *Category , id int) bool
-    Delete(id int) bool
-
+    Read(id string) (*Category , error)
+    Update(data *Category , id string) bool
+    Delete(id string) bool
+    List() interface{}
 }
 
 type Category struct {
