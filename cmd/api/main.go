@@ -1,7 +1,9 @@
 package main
 
 import (
-    "crud_go/internal/app"
+    "crud_go/internal/domain"
+    "crud_go/internal/repository"
+
     "encoding/json"
     "flag"
     "fmt"
@@ -13,7 +15,7 @@ import (
 var (
     porta *int
     baseUrl string
-    repo app.Repository
+    repo domain.RepositoryCategory
 )
 
 func init() {
@@ -25,9 +27,9 @@ func init() {
 
 func main() {
     // na memória
-    // repo = app.CreateRepository()
+    repo = repository.CreateRepository()
     // no BD
-    repo = app.NewMongoRepository(app.Connect())
+    //repo = repository.NewMongoRepository(repository.Connect())
    
     http.HandleFunc("/api/addCategory", addCategory)
     http.HandleFunc("/api/deleteCategory", deleteCategory)
@@ -46,7 +48,7 @@ func addCategory(w http.ResponseWriter, r *http.Request) {
     }
     
     b, _ := ioutil.ReadAll(r.Body)
-    var category app.Category
+    var category domain.Category
     errJson := json.Unmarshal(b, &category)
     if errJson != nil {
         makeResponse(w,Response{"success" : false,"message":"Json invalido"},http.StatusInternalServerError,Headers{"Content-type":"application/json"})
@@ -111,7 +113,7 @@ func updateCategory(w http.ResponseWriter , r *http.Request){
         return
     }
 
-    var category app.Category
+    var category domain.Category
     
     id := r.URL.Query().Get("id")
     b, _ := ioutil.ReadAll(r.Body)

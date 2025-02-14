@@ -1,6 +1,6 @@
-package app
+package domain
 
-type Repository interface {
+type RepositoryCategory interface {
     Create(data *Category) bool
     Read(id string) (*Category , error)
     Update(data *Category , id string) bool

@@ -1,6 +1,7 @@
-package app
+package repository
 
 import (
+    "crud_go/internal/domain"
     "context"
     "fmt"
     "log"
@@ -57,7 +58,7 @@ func Connect() *mongo.Collection {
     return collection
 }
 
-func (c *mongoRepository) Create(data *Category) bool{
+func (c *mongoRepository) Create(data *domain.Category) bool{
     _, err := c.collection.InsertOne(c.context , data)
 	if err != nil{
         return false
@@ -81,7 +82,7 @@ func (c *mongoRepository) Delete(id string) bool{
 	return true
 }
 
-func (c *mongoRepository) Read(id string) (*Category , error){
+func (c *mongoRepository) Read(id string) (*domain.Category , error){
     
     objId, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
@@ -90,7 +91,7 @@ func (c *mongoRepository) Read(id string) (*Category , error){
 
     filter := bson.D{primitive.E{Key:"_id" , Value:objId}}
 
-    var category *Category
+    var category *domain.Category
     errDB := c.collection.FindOne(c.context,filter).Decode(&category)
 	if errDB != nil {
 		return nil, err
@@ -100,7 +101,7 @@ func (c *mongoRepository) Read(id string) (*Category , error){
 }
 
 
-func (c *mongoRepository) Update(data *Category , id string) bool{
+func (c *mongoRepository) Update(data *domain.Category , id string) bool{
     objId, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		log.Fatal("ID inválido:", err)
@@ -126,7 +127,7 @@ func (c *mongoRepository) List() interface{}{
 
     var arrayCategories []interface{}
     for cursor.Next(c.context) {
-        var categorie Category
+        var categorie domain.Category
 		if err := cursor.Decode(&categorie); err != nil {
 			log.Fatal(err)
 		}
