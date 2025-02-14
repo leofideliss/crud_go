@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -18,7 +17,12 @@ func NewMongoRepository[T any](db *mongo.Database , collectionName string) *Mong
 // Inserir um novo documento
 func (r *MongoRepository[T]) Insert(ctx context.Context, entity *T) (*mongo.InsertOneResult, error) {
 	result, err := r.collection.InsertOne(ctx, entity)
-    fmt.Println(err)
+	return result, err
+}
+
+// Inserir um novo documento
+func (r *MongoRepository[T]) Delete(ctx context.Context, id string) (*mongo.DeleteResult, error) {
+	result, err := r.collection.DeleteOne(ctx, id)
 	return result, err
 }
 

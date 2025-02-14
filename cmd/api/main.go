@@ -42,8 +42,9 @@ func main() {
 
 	// Registrar a rota
 	http.HandleFunc("/api/addCategory", categoryHandler.CreateCategoryHandler)
+	http.HandleFunc("/api/listCategory", categoryHandler.ListCategoryHandler)
 
 	// Iniciar o servidor HTTP
-	log.Println("Servidor rodando na porta 8888...")
+	log.Printf("Servidor rodando na porta %d...",*porta)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", *porta), nil))
 }
