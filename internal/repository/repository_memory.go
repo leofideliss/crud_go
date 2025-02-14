@@ -1,9 +1,15 @@
 package repository
 
 import (
-    "github.com/google/uuid"
-    "crud_go/internal/domain"
+	"crud_go/internal/domain"
+	"github.com/google/uuid"
 )
+
+type Category struct {
+    Id string
+    Name string
+    Tag string
+}
 
 type repositoryInMemory struct {
 	categories map[string]*domain.Category
@@ -16,9 +22,12 @@ func CreateRepository() *repositoryInMemory {
 }
 
 func (r *repositoryInMemory) Create(c *domain.Category) bool {
-    id := uuid.New()
-    r.categories[id.String()] = c
-	return true
+    if c != nil{
+        id := uuid.New()
+        r.categories[id.String()] = c
+        return true
+    }
+    return false
 }
 
 func (r *repositoryInMemory) Delete (id string) bool {
@@ -42,6 +51,10 @@ func (r *repositoryInMemory) Update(data *domain.Category , id string) bool {
 }
 
 func (r *repositoryInMemory) List() interface{}{
-    return r.categories
+    var formatedCategories []Category
+    for i , v := range r.categories { 
+        formatedCategories = append(formatedCategories,Category{ i , v.Name , v.Tag})
+    }
+    return formatedCategories
 }
 
