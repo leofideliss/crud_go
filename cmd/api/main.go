@@ -46,6 +46,8 @@ func main() {
     http.HandleFunc("/api/deleteCategory", categoryHandler.DeleteCategoryHandler)
     http.HandleFunc("/api/updateCategory", categoryHandler.UpdateCategoryHandler)
     http.HandleFunc("/api/readCategory", categoryHandler.ReadCategoryHandler)
+    http.HandleFunc("/api/incrementLimit", categoryHandler.IncrementCategory)
+
 
 
         

@@ -6,4 +6,5 @@ type Category struct {
     Id primitive.ObjectID `json:"-" bson:"_id,omitempty"`
     Name string `json:"name" bson:"name"`
     Tag string `json:"tag" bson:"tag"`
+    Limit int `json:"limit" bson:"limit"`
 }

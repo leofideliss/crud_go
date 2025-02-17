@@ -8,7 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-
+    "strconv"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -134,4 +134,41 @@ func (h *CategoryHandler) UpdateCategoryHandler(w http.ResponseWriter, r *http.R
     return
 }
 
+func (h *CategoryHandler) IncrementCategory(w http.ResponseWriter , r *http.Request){
+    if helper.CheckMethodHttp(w,r,http.MethodPost){
+        operation := r.URL.Query().Get("operation")
+        value , _ := strconv.Atoi(r.URL.Query().Get("value"))
+        id := r.URL.Query().Get("id")
+ 
+        objId , _ := primitive.ObjectIDFromHex(id)
+        result, err := h.service.ReadCategories(context.Background(),objId)
+        if err != nil {
+            http.Error(w, "Erro ao buscar categoria", http.StatusInternalServerError)
+            return
+        }
 
+        switch operation {
+        case "add" :
+            result.Limit += value
+            break
+        case "sub" :
+            result.Limit -= value
+            break
+        }
+        
+        category :=  domain.Category{Name:result.Name , Tag:result.Tag , Limit:result.Limit,}
+        resultUpdate, errUpdate := h.service.UpdateCategory(context.Background(), &category ,objId)
+        if errUpdate != nil {
+            http.Error(w, "Erro ao buscar categoria", http.StatusInternalServerError)
+            return
+        }
+
+        w.Header().Set("Content-Type", "application/json")
+        w.WriteHeader(http.StatusOK)
+        json.NewEncoder(w).Encode(map[string]interface{}{
+            "message": "Categoria atualizada com sucesso",
+            "categoria" : resultUpdate.MatchedCount,
+        })
+
+    }
+}
