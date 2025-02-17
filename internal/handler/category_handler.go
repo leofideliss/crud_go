@@ -6,7 +6,10 @@ import (
 	"crud_go/internal/service"
 	"crud_go/pkg/helper"
 	"encoding/json"
+	"fmt"
 	"net/http"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type CategoryHandler struct {
@@ -59,3 +62,76 @@ func (h *CategoryHandler) ListCategoryHandler(w http.ResponseWriter, r *http.Req
     }
     return
 }
+
+func (h *CategoryHandler) DeleteCategoryHandler(w http.ResponseWriter, r *http.Request) {
+    if helper.CheckMethodHttp(w,r,http.MethodDelete) {
+        id := r.URL.Query().Get("id")
+        objId , _ := primitive.ObjectIDFromHex(id)
+        result, err := h.service.DeleteCategory(context.Background(),objId)
+        if err != nil {
+            http.Error(w, "Erro ao deletar categoria", http.StatusInternalServerError)
+            return
+        }
+
+        w.Header().Set("Content-Type", "application/json")
+        w.WriteHeader(http.StatusOK)
+        json.NewEncoder(w).Encode(map[string]interface{}{
+            "message": "Categoria deletada com sucesso",
+            "deleted" : result.DeletedCount,
+        })
+
+    }
+    return
+}
+
+func (h *CategoryHandler) ReadCategoryHandler(w http.ResponseWriter, r *http.Request) {
+    if helper.CheckMethodHttp(w,r,http.MethodGet) {
+        id := r.URL.Query().Get("id")
+        objId , _ := primitive.ObjectIDFromHex(id)
+        result, err := h.service.ReadCategories(context.Background(),objId)
+        if err != nil {
+            http.Error(w, "Erro ao buscar categoria", http.StatusInternalServerError)
+            return
+        }
+
+        w.Header().Set("Content-Type", "application/json")
+        w.WriteHeader(http.StatusOK)
+        json.NewEncoder(w).Encode(map[string]interface{}{
+            "message": "Categoria consultada com sucesso",
+            "categoria" : result,
+        })
+
+    }
+    return
+}
+
+func (h *CategoryHandler) UpdateCategoryHandler(w http.ResponseWriter, r *http.Request) {
+    if helper.CheckMethodHttp(w,r,http.MethodPatch) {
+        id := r.URL.Query().Get("id")
+        objId , _ := primitive.ObjectIDFromHex(id)
+
+        var category domain.Category
+        if err := json.NewDecoder(r.Body).Decode(&category); err != nil {
+            http.Error(w, "Erro ao decodificar JSON", http.StatusBadRequest)
+            return
+        }
+        
+        result, err := h.service.UpdateCategory(context.Background(), &category ,objId)
+        if err != nil {
+            fmt.Println(err)
+            http.Error(w, "Erro ao atualizar categoria", http.StatusInternalServerError)
+            return
+        }
+
+        w.Header().Set("Content-Type", "application/json")
+        w.WriteHeader(http.StatusOK)
+        json.NewEncoder(w).Encode(map[string]interface{}{
+            "message": "Categoria atualizada com sucesso",
+            "categoria" : result.MatchedCount,
+        })
+
+    }
+    return
+}
+
+

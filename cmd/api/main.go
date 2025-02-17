@@ -26,7 +26,7 @@ func init() {
 }
 
 func main() {
-
+    
 	// Conectar ao MongoDB
 	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI("mongodb://localhost:27017"))
 	if err != nil {
@@ -42,8 +42,13 @@ func main() {
 
 	// Registrar a rota
 	http.HandleFunc("/api/addCategory", categoryHandler.CreateCategoryHandler)
-	http.HandleFunc("/api/listCategory", categoryHandler.ListCategoryHandler)
+    http.HandleFunc("/api/listCategory", categoryHandler.ListCategoryHandler)
+    http.HandleFunc("/api/deleteCategory", categoryHandler.DeleteCategoryHandler)
+    http.HandleFunc("/api/updateCategory", categoryHandler.UpdateCategoryHandler)
+    http.HandleFunc("/api/readCategory", categoryHandler.ReadCategoryHandler)
 
+
+        
 	// Iniciar o servidor HTTP
 	log.Printf("Servidor rodando na porta %d...",*porta)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", *porta), nil))
