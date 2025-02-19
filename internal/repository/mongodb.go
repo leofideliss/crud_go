@@ -33,7 +33,7 @@ func (r *MongoRepository[T]) Delete(ctx context.Context, id primitive.ObjectID) 
 func (r *MongoRepository[T]) Update(ctx context.Context, entity *T ,id primitive.ObjectID) (*mongo.UpdateResult, error) {
     filter := bson.D{{"_id", id}}
     update := bson.M{"$set": entity}
-	result, err := r.collection.UpdateOne(ctx, filter , update)
+ 	result, err := r.collection.UpdateOne(ctx, filter , update)
 	return result, err
 }
 
